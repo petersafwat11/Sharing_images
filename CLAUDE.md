@@ -545,3 +545,16 @@ must be recorded in the "Outstanding TODOs" section below.
 - **Phase 2 — `update-user.dto.ts`:** CLAUDE.md §5.1 lists this DTO, but
   the only user endpoint so far is `GET /users/me`. The DTO will be
   added in Phase 4 when `PATCH /users/me` is needed for profile edits.
+- **Phase 4 — Input / Label primitive:** `Input` and `Label` aren't in
+  the approved shadcn list (§2) but are required to render the auth
+  forms consistently with the design tokens. Added minimal primitives
+  in `components/ui/input.tsx`. Revisit if we adopt shadcn's Form suite.
+- **Phase 4 — `next-auth` deferred to Phase 5:** login/register still
+  hit the NestJS `/auth/*` endpoints directly. The
+  `app/api/auth/[...nextauth]/route.ts` route from §6.1 does not exist
+  yet. Dashboard gating is therefore client-side only (a brief
+  logged-out flash is possible before the `useEffect` redirect fires).
+- **Phase 4 — BlurImage blurhash decoding:** the `blurHash` string is
+  stored and exposed via the API, but the React component currently
+  shows a solid subtle tint instead of the decoded blur. Full decoding
+  (via `blurhash` → canvas → data URL) is a Phase 5 polish item.
