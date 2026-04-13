@@ -519,7 +519,20 @@ must be recorded in the "Outstanding TODOs" section below.
 > with a one-line reason.
 
 - **Phase 1 — `docker-compose.yml`:** Only `postgres` and `redis` services
-  are defined for now. The spec calls for `api`, `worker`, and `web`
-  containers as well, but those require Dockerfiles that come with their
-  apps. They will be added in Phase 2 (`api`, `worker`) and Phase 3
-  (`web`) so the compose file always points to real, buildable images.
+  were defined in Phase 1. `api` and `worker` were added in Phase 2
+  (pointing at `apps/api/Dockerfile`); `web` is still pending on
+  Phase 3's Dockerfile.
+- **Phase 2 — worker deployment model:** `api` and `worker` share the
+  same Docker image and entrypoint (`node dist/main.js`). Both containers
+  run the full NestJS app, meaning both also run the `@Processor` and
+  will share jobs from the BullMQ queue. Splitting into a dedicated
+  worker bootstrap file is deferred until horizontal scaling actually
+  requires it.
+- **Phase 2 — Views flush loop:** `ImagesService.flushViewCounter(slug)`
+  exists and works per-slug, but there is no scheduler yet iterating all
+  tracked slugs every 5 minutes. A BullMQ repeatable job will be added
+  in Phase 5 polish — bump views increment via `INCR` still works today,
+  the counter is just not yet reconciled back to Postgres.
+- **Phase 2 — `update-user.dto.ts`:** CLAUDE.md §5.1 lists this DTO, but
+  the only user endpoint so far is `GET /users/me`. The DTO will be
+  added in Phase 4 when `PATCH /users/me` is needed for profile edits.

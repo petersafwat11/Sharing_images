@@ -34,9 +34,43 @@ services:
       timeout: 5s
       retries: 10
 
-  # NOTE: api / worker / web services intentionally omitted in Phase 1.
-  # They will be added in Phase 2 / 3 once their Dockerfiles exist.
-  # See CLAUDE.md §10 (build order) — this is recorded in §12 deviations.
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: picflow-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "3001:3001"
+    command: ["node", "dist/main.js"]
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: picflow-worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    env_file:
+      - .env
+    command: ["node", "dist/main.js"]
+
+  # NOTE: `web` service intentionally omitted in Phase 2.
+  # It will be added in Phase 3 once `apps/web/Dockerfile` exists.
+  # Recorded in CLAUDE.md §12.
 
 volumes:
   postgres_data:

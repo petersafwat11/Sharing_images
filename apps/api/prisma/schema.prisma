@@ -1,0 +1,53 @@
+// Picflow database schema
+// See CLAUDE.md §4 for canonical definitions.
+// Every query MUST use `select` to avoid over-fetching (§8).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  avatarUrl    String?
+  storageUsed  Int      @default(0) // bytes
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  images Image[]
+
+  @@map("users")
+}
+
+model Image {
+  id          String    @id @default(cuid())
+  slug        String    @unique // nanoid(8) — share URL identifier
+  filename    String
+  mimeType    String
+  size        Int // bytes
+  width       Int?
+  height      Int?
+  originalKey String // R2 object key
+  thumbKey    String? // R2 key for 400px thumbnail
+  webpKey     String? // R2 key for WebP variant
+  blurHash    String? // blurhash placeholder
+  views       Int       @default(0)
+  isPublic    Boolean   @default(true)
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("images")
+}
