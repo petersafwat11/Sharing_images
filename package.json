@@ -1,0 +1,24 @@
+{
+  "name": "picflow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Picflow - Drop it. Share it. A clean, fast image hosting and sharing platform.",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "2.0.6",
+    "typescript": "5.4.5",
+    "prettier": "3.3.2"
+  },
+  "packageManager": "pnpm@9.4.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

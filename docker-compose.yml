@@ -1,0 +1,45 @@
+name: picflow
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: picflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: picflow
+      POSTGRES_PASSWORD: picflow
+      POSTGRES_DB: picflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U picflow -d picflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: picflow-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # NOTE: api / worker / web services intentionally omitted in Phase 1.
+  # They will be added in Phase 2 / 3 once their Dockerfiles exist.
+  # See CLAUDE.md §10 (build order) — this is recorded in §12 deviations.
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
