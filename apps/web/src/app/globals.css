@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Picflow design tokens — CLAUDE.md §3.1.
+ * Dark-first: :root declares the only palette. No light mode override.
+ */
+:root {
+  /* Backgrounds */
+  --bg-base: #0a0a0b;
+  --bg-surface: #111113;
+  --bg-elevated: #1a1a1e;
+  --bg-subtle: #222226;
+
+  /* Borders */
+  --border-default: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --border-focus: rgba(139, 92, 246, 0.6);
+
+  /* Text */
+  --text-primary: #f2f2f3;
+  --text-secondary: #9898a4;
+  --text-tertiary: #5c5c6b;
+  --text-disabled: #3a3a47;
+
+  /* Accent — violet */
+  --accent-default: #8b5cf6;
+  --accent-hover: #7c3aed;
+  --accent-subtle: rgba(139, 92, 246, 0.12);
+  --accent-border: rgba(139, 92, 246, 0.3);
+
+  /* Semantic */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border-default;
+  }
+
+  html {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-bg-base text-text-primary font-sans;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* Scrollbar — subtle, matches surfaces */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-base);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--bg-elevated);
+    border-radius: 6px;
+    border: 2px solid var(--bg-base);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--bg-subtle);
+  }
+
+  /* Focus ring for keyboard users only */
+  :focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: var(--accent-subtle);
+    color: var(--text-primary);
+  }
+}
+
+@layer utilities {
+  .slug-mono {
+    @apply font-mono bg-bg-subtle px-2 py-1 rounded-sm text-[13px];
+  }
+}

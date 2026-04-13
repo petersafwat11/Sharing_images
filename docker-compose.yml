@@ -68,9 +68,19 @@ services:
       - .env
     command: ["node", "dist/main.js"]
 
-  # NOTE: `web` service intentionally omitted in Phase 2.
-  # It will be added in Phase 3 once `apps/web/Dockerfile` exists.
-  # Recorded in CLAUDE.md §12.
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: picflow-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
 
 volumes:
   postgres_data:

@@ -518,10 +518,19 @@ must be recorded in the "Outstanding TODOs" section below.
 > Anything we deferred or changed from the spec gets logged here, dated,
 > with a one-line reason.
 
-- **Phase 1 — `docker-compose.yml`:** Only `postgres` and `redis` services
-  were defined in Phase 1. `api` and `worker` were added in Phase 2
-  (pointing at `apps/api/Dockerfile`); `web` is still pending on
-  Phase 3's Dockerfile.
+- **Phase 1 — `docker-compose.yml`:** `postgres` and `redis` defined in
+  Phase 1, `api` and `worker` added in Phase 2, `web` added in Phase 3.
+  All four Dockerfiles + compose entries now present.
+- **Phase 3 — Auth token storage:** JWTs are stored in `localStorage`
+  under key `picflow:token` and sent via `Authorization: Bearer <t>`.
+  This is a pragmatic choice for the utility-app scope; moving to
+  httpOnly cookies (with next-auth handling session rotation) is a
+  Phase 5 follow-up if we add any sensitive data beyond share links.
+- **Phase 3 — `next-auth`:** listed in CLAUDE.md §2 but not yet wired
+  up — the current auth flow uses direct calls to the NestJS `/auth/*`
+  endpoints. `next-auth` will be added in Phase 4 to support the
+  `app/api/auth/[...nextauth]/route.ts` route specified in §6.1 once
+  we decide whether we need OAuth providers or just keep credentials.
 - **Phase 2 — worker deployment model:** `api` and `worker` share the
   same Docker image and entrypoint (`node dist/main.js`). Both containers
   run the full NestJS app, meaning both also run the `@Processor` and
