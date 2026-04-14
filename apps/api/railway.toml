@@ -1,0 +1,5 @@
+[build]
+buildCommand = "pnpm --filter @picflow/api build"
+
+[deploy]
+startCommand = "pnpm --filter @picflow/api start:prod"
