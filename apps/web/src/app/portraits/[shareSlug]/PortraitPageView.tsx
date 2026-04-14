@@ -120,7 +120,7 @@ export function PortraitPageView({ shareSlug }: PortraitPageViewProps): React.Re
                   Your portraits
                 </h1>
                 {theme && (
-                  <Badge variant="secondary" className="text-caption">
+                  <Badge variant="default" className="text-caption">
                     {theme.name}
                   </Badge>
                 )}
