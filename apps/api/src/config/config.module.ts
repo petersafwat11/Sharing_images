@@ -10,6 +10,8 @@ import { validateEnv } from './config.schema';
       isGlobal: true,
       cache: true,
       validate: validateEnv,
+      // Resolve .env from repo root when Turborepo runs from apps/api in dev
+      envFilePath: ['../../.env', '.env'],
     }),
   ],
   providers: [AppConfigService],

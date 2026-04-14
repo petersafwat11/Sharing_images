@@ -8,6 +8,7 @@ import { BlurImage } from '@/components/common/BlurImage';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { CopyLinkButton } from '@/components/images/CopyLinkButton';
 import { ImageStats } from '@/components/images/ImageStats';
+import { SocialShareButtons } from '@/components/images/SocialShareButtons';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { getCurrentUser } from '@/lib/api/auth';
@@ -99,6 +100,10 @@ export function ImageViewer({ image }: ImageViewerProps): React.ReactElement {
             </Button>
           )}
         </div>
+
+        <Separator />
+
+        <SocialShareButtons url={share} title={image.filename} />
       </aside>
 
       {isOwner && (

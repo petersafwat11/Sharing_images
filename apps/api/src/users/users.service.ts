@@ -9,6 +9,7 @@ const PUBLIC_SELECT = {
   avatarUrl: true,
   storageUsed: true,
   createdAt: true,
+  creditBalance: true,
 } as const;
 
 const AUTH_SELECT = {
@@ -93,6 +94,7 @@ export class UsersService {
     avatarUrl: string | null;
     storageUsed: number;
     createdAt: Date;
+    creditBalance: number;
   }): PublicUser {
     return {
       id: user.id,
@@ -101,6 +103,7 @@ export class UsersService {
       avatarUrl: user.avatarUrl,
       storageUsed: user.storageUsed,
       createdAt: user.createdAt.toISOString(),
+      creditBalance: user.creditBalance,
     };
   }
 }

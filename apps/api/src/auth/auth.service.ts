@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { AuthResponse, PublicUser } from '@picflow/shared';
 import * as bcrypt from 'bcrypt';
 import { AppConfigService } from '../config/app-config.service';
+import { CreditsService } from '../credits/credits.service';
 import { UsersService } from '../users/users.service';
 
 const BCRYPT_ROUNDS = 12;
@@ -23,6 +24,7 @@ export class AuthService {
     private readonly users: UsersService,
     private readonly jwt: JwtService,
     private readonly config: AppConfigService,
+    private readonly credits: CreditsService,
   ) {}
 
   async register(
@@ -37,6 +39,8 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
     const user = await this.users.create({ email, username, passwordHash });
+    // Write audit ledger entry for the 3 credits already seeded by DB default
+    await this.credits.awardSignupBonus(user.id);
     return this.signResponse(user);
   }
 

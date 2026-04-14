@@ -17,7 +17,7 @@ export interface PresignedUpload {
 }
 
 /**
- * Thin abstraction around Cloudflare R2 (S3-compatible).
+ * Thin abstraction around AWS S3 (will migrate to Cloudflare R2 later).
  * Nothing outside this service should touch `@aws-sdk/*` directly.
  */
 @Injectable()
@@ -28,17 +28,16 @@ export class StorageService {
   private readonly publicBaseUrl: string;
 
   constructor(private readonly config: AppConfigService) {
+    const region = config.get('AWS_REGION');
     this.client = new S3Client({
-      region: 'auto',
-      endpoint: config.get('R2_ENDPOINT'),
+      region,
       credentials: {
-        accessKeyId: config.get('R2_ACCESS_KEY_ID'),
-        secretAccessKey: config.get('R2_SECRET_ACCESS_KEY'),
+        accessKeyId: config.get('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: config.get('AWS_SECRET_ACCESS_KEY'),
       },
-      forcePathStyle: true,
     });
-    this.bucket = config.get('R2_BUCKET_NAME');
-    this.publicBaseUrl = config.get('R2_PUBLIC_URL').replace(/\/+$/, '');
+    this.bucket = config.get('AWS_S3_BUCKET');
+    this.publicBaseUrl = `https://${this.bucket}.s3.${region}.amazonaws.com`;
   }
 
   async presignPut(
@@ -81,7 +80,7 @@ export class StorageService {
       new GetObjectCommand({ Bucket: this.bucket, Key: key }),
     );
     if (!res.Body) {
-      throw new Error(`R2 object has no body: ${key}`);
+      throw new Error(`S3 object has no body: ${key}`);
     }
     const chunks: Buffer[] = [];
     // AWS SDK v3 returns a web stream in Node runtime; transformToByteArray handles both.

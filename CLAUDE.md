@@ -42,8 +42,27 @@ Workspace packages are referenced as `@picflow/<name>` (e.g.
 - Next.js 14 (App Router only, no `pages/`)
 - TypeScript strict mode
 - Tailwind CSS v3
-- shadcn/ui — only these components: Button, Card, Dialog, Toast,
-  Progress, Tooltip, DropdownMenu, Skeleton, Badge, Avatar, Separator
+- shadcn/ui — approved components (customize via `components/ui/`, never modify the
+  registry source directly):
+  - **Existing (Phases 1–5):** Button, Card, Dialog, Toast, Progress, Tooltip,
+    DropdownMenu, Skeleton, Badge, Avatar, Separator, Input, Label
+  - **AI portrait phases:** Tabs, Sheet, Accordion, AspectRatio, ScrollArea, Alert,
+    AlertDialog, Switch, RadioGroup, HoverCard, Form, Textarea, Select
+  - **Tabs** — theme category browsing, dashboard tabs, multi-theme results, gallery filter
+  - **Sheet** — Gelato print order bottom drawer; any panel that slides in from an edge
+  - **Accordion** — FAQ on `/pricing`; any collapsible Q&A block
+  - **AspectRatio** — portrait result cards, theme preview images, hero before/after images
+  - **ScrollArea** — horizontal theme strip on landing; portrait result scroll on mobile
+  - **Alert** — inline quality warnings, moderation rejection, failed generation messages
+  - **AlertDialog** — destructive confirms only (delete portrait, delete account)
+  - **Switch** — gallery opt-in toggle; any boolean setting toggle
+  - **RadioGroup** — credit pack selection on `/pricing`; single theme selection
+  - **HoverCard** — theme card hover mini-gallery (Phase 2 four-variant preview)
+  - **Form** — auth forms, gift form, email gate; provides field-level validation via
+    react-hook-form (adds `react-hook-form` + `@hookform/resolvers` as deps)
+  - **Textarea** — gift personal message; any multi-line text input
+  - **Select** — dashboard sort order (Newest / Oldest / Most Viewed / Largest)
+  - Do NOT add components outside this list without updating this section first
 - TanStack Query v5 — all server state (no `useState` for async data)
 - react-dropzone — upload area
 - axios — uploads with progress tracking (not `fetch`)
@@ -547,10 +566,10 @@ must be recorded in the "Outstanding TODOs" section below.
 - **Phase 2 — `update-user.dto.ts`:** CLAUDE.md §5.1 lists this DTO, but
   the only user endpoint so far is `GET /users/me`. The DTO will be
   added in Phase 4 when `PATCH /users/me` is needed for profile edits.
-- **Phase 4 — Input / Label primitive:** `Input` and `Label` aren't in
-  the approved shadcn list (§2) but are required to render the auth
-  forms consistently with the design tokens. Added minimal primitives
-  in `components/ui/input.tsx`. Revisit if we adopt shadcn's Form suite.
+- **Phase 4 → resolved — Input / Label + Form suite:** `Input` and `Label`
+  were added as minimal primitives in Phase 4. Both are now formally in the
+  approved shadcn list (§2) alongside `Form` (react-hook-form integration).
+  `Form` supersedes the manual Input+Label approach for new forms going forward.
 - **Phase 4 — `next-auth` deferred to Phase 5:** login/register still
   hit the NestJS `/auth/*` endpoints directly. The
   `app/api/auth/[...nextauth]/route.ts` route from §6.1 does not exist
@@ -573,3 +592,17 @@ must be recorded in the "Outstanding TODOs" section below.
   anonymous visitors.
 - **Phase 5 — `next-auth` still deferred:** kept localStorage JWT for
   the v1 utility scope. Tracked here for future revisit.
+- **Phase 4 — Portrait results page:** `app/portraits/[shareSlug]/page.tsx` + `PortraitPageView.tsx`
+  now exist. Polling via `usePortraitStatus`, `GeneratingScreen` for in-progress states,
+  `PortraitResultsGrid` (2×2) + `PortraitResultCard` for download/print on done state.
+- **Phase 4 — Gift flow:** `Gift` Prisma model, `gifts` NestJS module (`POST /gifts`, `GET /gifts/:id`),
+  `/gifts/new` (create form), `/gifts/[giftId]` (recipient page). Gift link marks as claimed on first view.
+- **Phase 4 — Gallery:** `Portrait.isPublic` field, `gallery` NestJS module (`GET /gallery`, `PATCH /gallery/:shareSlug`),
+  `/gallery` page with infinite scroll + category tabs. Toggle on portrait results page.
+- **Phase 4 — Analytics:** Redis-backed counters (starts/completions/failures per theme) flushed to
+  `ThemeAnalytics` Prisma model. `AnalyticsService` injected into `PortraitsService`. Admin dashboard
+  at `/dashboard/admin` (checks `ADMIN_USER_ID` env var; any user if unset in dev).
+- **Phase 4 — Gelato print (stub):** `POST /portraits/:shareSlug/print` returns 503 until `GELATO_API_KEY`
+  configured. `PrintOrderSheet` (bottom Sheet) shows "Coming soon" with product list grayed out.
+- **Phase 4 — Header nav:** `HeaderNavLinks.tsx` adds Themes + Gallery links (desktop). User dropdown
+  gets Analytics link → `/dashboard/admin`.

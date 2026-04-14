@@ -3,12 +3,18 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { AuthModule } from './auth/auth.module';
+import { CreditsModule } from './credits/credits.module';
+import { GalleryModule } from './gallery/gallery.module';
+import { GiftsModule } from './gifts/gifts.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { AppConfigModule } from './config/config.module';
 import { AppConfigService } from './config/app-config.service';
 import { ImagesModule } from './images/images.module';
+import { PaymentsModule } from './payments/payments.module';
+import { PortraitsModule } from './portraits/portraits.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { StorageModule } from './storage/storage.module';
@@ -34,7 +40,7 @@ import { WorkersModule } from './workers/workers.module';
       useFactory: (config: AppConfigService) => {
         const url = new URL(config.get('REDIS_URL'));
         return {
-          connection: {
+          redis: {
             host: url.hostname,
             port: Number(url.port || 6379),
             password: url.password || undefined,
@@ -42,10 +48,16 @@ import { WorkersModule } from './workers/workers.module';
         };
       },
     }),
+    AnalyticsModule,
     AuthModule,
+    CreditsModule,
+    GalleryModule,
+    GiftsModule,
     UsersModule,
     UploadModule,
     ImagesModule,
+    PortraitsModule,
+    PaymentsModule,
     WorkersModule,
   ],
   providers: [

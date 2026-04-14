@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { LogOut, LayoutDashboard } from 'lucide-react';
+import { LogOut, LayoutDashboard, BarChart3 } from 'lucide-react';
 import type { PublicUser } from '@picflow/shared';
 import { getCurrentUser, logout } from '@/lib/api/auth';
 import { getAuthToken, ApiError } from '@/lib/api/client';
@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { CreditBadge } from '@/components/portrait/CreditBadge';
 
 /**
  * Renders login/signup buttons OR the authenticated avatar dropdown.
@@ -56,7 +57,9 @@ export function HeaderAuthSlot(): React.ReactElement {
   };
 
   return (
-    <DropdownMenu>
+    <div className="flex items-center gap-3">
+      <CreditBadge credits={user.creditBalance} />
+      <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -78,11 +81,17 @@ export function HeaderAuthSlot(): React.ReactElement {
           <LayoutDashboard className="h-4 w-4" />
           Dashboard
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => router.push('/dashboard/admin')}>
+          <BarChart3 className="h-4 w-4" />
+          Analytics
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={onLogout}>
           <LogOut className="h-4 w-4" />
           Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    </div>
   );
 }

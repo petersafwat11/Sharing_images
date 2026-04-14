@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { HeaderAuthSlot } from './HeaderAuthSlot';
+import { HeaderNavLinks } from './HeaderNavLinks';
 
 /**
  * Site-wide header. Logo on the left ("Picflow" in display font with
@@ -25,7 +26,10 @@ export function Header(): React.ReactElement {
           </span>
         </Link>
 
-        <HeaderAuthSlot />
+        <div className="flex items-center gap-4 sm:gap-6">
+          <HeaderNavLinks />
+          <HeaderAuthSlot />
+        </div>
       </div>
     </header>
   );

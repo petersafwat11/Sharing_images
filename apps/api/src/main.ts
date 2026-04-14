@@ -8,6 +8,7 @@ import { AppConfigService } from './config/app-config.service';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
+    rawBody: true, // Required for Stripe webhook signature verification
   });
 
   const config = app.get(AppConfigService);

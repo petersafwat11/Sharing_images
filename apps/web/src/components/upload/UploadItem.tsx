@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { AlertCircle, CheckCircle2, Loader2, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { QueuedUpload } from '@picflow/shared';
@@ -21,6 +22,18 @@ export function UploadItem({
   item,
   onRemove,
 }: UploadItemProps): React.ReactElement {
+  // Create the object URL inside an effect so React Strict Mode's double-invoke
+  // doesn't revoke the URL before the image element can load it.
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileRef = useRef(item.file);
+  useEffect(() => {
+    const url = URL.createObjectURL(fileRef.current);
+    setPreviewUrl(url);
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, []);
+
   if (item.status === 'done' && item.slug && item.shareUrl) {
     return (
       <UploadSuccessCard
@@ -28,6 +41,7 @@ export function UploadItem({
         shareUrl={item.shareUrl}
         filename={item.file.name}
         size={item.file.size}
+        previewObjectUrl={previewUrl ?? undefined}
         onDismiss={() => onRemove(item.id)}
       />
     );

@@ -1,5 +1,6 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import type { Observable } from 'rxjs';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 
 /**
@@ -9,7 +10,7 @@ import type { AuthenticatedUser } from '../../common/decorators/current-user.dec
  */
 @Injectable()
 export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
-  override canActivate(context: ExecutionContext): ReturnType<AuthGuard['canActivate']> {
+  override canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     return super.canActivate(context);
   }
 

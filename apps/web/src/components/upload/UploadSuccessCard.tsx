@@ -13,19 +13,22 @@ interface UploadSuccessCardProps {
   shareUrl: string;
   filename: string;
   size: number;
+  /** Object URL created from the local File — gives instant preview. */
+  previewObjectUrl?: string;
   onDismiss?: () => void;
 }
 
 /**
  * Shown inline when an upload completes. Slides up + fades in per §7.
- * Exposes the shareable URL as a monospace slug and a one-click copy
- * button.
+ * Shows an instant local-file preview so the user sees their image
+ * immediately, before the server finishes processing.
  */
 export function UploadSuccessCard({
   slug,
   shareUrl,
   filename,
   size,
+  previewObjectUrl,
   onDismiss,
 }: UploadSuccessCardProps): React.ReactElement {
   return (
@@ -35,6 +38,21 @@ export function UploadSuccessCard({
       transition={{ duration: 0.25, ease: 'easeOut' }}
     >
       <Card className="flex flex-col gap-4 p-5">
+        {/* Instant local preview */}
+        {previewObjectUrl && (
+          <div className="flex max-h-56 items-center justify-center overflow-hidden rounded-lg border border-border-default bg-bg-subtle">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={previewObjectUrl}
+              alt={filename}
+              className="max-h-56 w-auto max-w-full object-contain"
+              onError={(e) => {
+                (e.currentTarget.parentElement as HTMLDivElement).style.display = 'none';
+              }}
+            />
+          </div>
+        )}
+
         <header className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-mono text-[11px] uppercase tracking-wide text-accent">

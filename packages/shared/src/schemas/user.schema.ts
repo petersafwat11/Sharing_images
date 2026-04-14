@@ -7,6 +7,7 @@ export const PublicUserSchema = z.object({
   avatarUrl: z.string().url().nullable(),
   storageUsed: z.number().int().nonnegative(),
   createdAt: z.string().datetime(),
+  creditBalance: z.number().int().nonnegative(),
 });
 
 export type PublicUser = z.infer<typeof PublicUserSchema>;

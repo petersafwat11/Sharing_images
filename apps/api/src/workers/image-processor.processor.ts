@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { QUEUE_NAMES, THUMBNAIL_WIDTH_PX } from '@picflow/shared';
 import { encode as encodeBlurhash } from 'blurhash';
 import type { Job } from 'bullmq';
-import * as sharp from 'sharp';
+import sharp from 'sharp';
 import { ImagesService } from '../images/images.service';
 import { StorageService } from '../storage/storage.service';
 import type { ImageProcessingJob } from '../upload/upload.service';

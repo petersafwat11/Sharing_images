@@ -12,18 +12,122 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  username     String   @unique
-  passwordHash String
-  avatarUrl    String?
-  storageUsed  Int      @default(0) // bytes
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(cuid())
+  email         String   @unique
+  username      String   @unique
+  passwordHash  String
+  avatarUrl     String?
+  storageUsed   Int      @default(0) // bytes
+  creditBalance Int      @default(3) // free credits on signup
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  images Image[]
+  images   Image[]
+  portraits Portrait[]
+  credits  CreditTransaction[]
 
   @@map("users")
+}
+
+model Portrait {
+  id          String         @id @default(cuid())
+  userId      String?
+  user        User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  email       String? // anonymous email-gate — used for "ready" notification
+  status      PortraitStatus @default(PENDING)
+  themeSlug   String
+  inputKeys   String[] // S3 keys for source photos (deleted after generation)
+  replicateId String? // Replicate prediction ID for polling + webhook lookup
+  shareSlug   String         @unique // nanoid(8) — share URL identifier
+  isPublic    Boolean        @default(false) // user opted in to public gallery
+  expiresAt   DateTime? // anonymous portraits expire after 7 days
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  results PortraitResult[]
+  gifts   Gift[]
+
+  @@index([userId])
+  @@index([shareSlug])
+  @@index([createdAt])
+  @@index([isPublic, createdAt])
+  @@map("portraits")
+}
+
+model Gift {
+  id            String    @id @default(cuid())
+  portraitId    String
+  portrait      Portrait  @relation(fields: [portraitId], references: [id], onDelete: Cascade)
+  recipientName String
+  message       String?
+  claimed       Boolean   @default(false)
+  claimedAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([portraitId])
+  @@map("gifts")
+}
+
+model ThemeAnalytics {
+  id          String   @id @default(cuid())
+  themeSlug   String
+  date        DateTime // UTC date (time set to 00:00:00)
+  starts      Int      @default(0)
+  completions Int      @default(0)
+  failures    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([themeSlug, date])
+  @@index([date])
+  @@map("theme_analytics")
+}
+
+model PortraitResult {
+  id         String   @id @default(cuid())
+  portraitId String
+  portrait   Portrait @relation(fields: [portraitId], references: [id], onDelete: Cascade)
+  s3Key      String
+  width      Int?
+  height     Int?
+  blurHash   String?
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([portraitId])
+  @@map("portrait_results")
+}
+
+model CreditTransaction {
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  delta       Int // positive = credit, negative = debit
+  type        CreditType
+  description String
+  stripeId    String? // Stripe payment intent ID (Phase 3)
+  portraitId  String?
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+  // Unique on stripeId prevents double-crediting from duplicate Stripe webhooks.
+  // NULL values (non-purchase transactions) are considered distinct in PostgreSQL.
+  @@unique([stripeId])
+  @@map("credit_transactions")
+}
+
+enum PortraitStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+enum CreditType {
+  SIGNUP_BONUS
+  PURCHASE
+  GENERATION
+  REFUND
 }
 
 model Image {
