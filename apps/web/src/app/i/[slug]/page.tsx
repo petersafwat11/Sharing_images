@@ -6,13 +6,14 @@ import { fetchImageBySlugServer } from '@/lib/api/server';
 import { shareUrl } from '@/lib/config';
 
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const image = await fetchImageBySlugServer(params.slug);
+  const { slug } = await params;
+  const image = await fetchImageBySlugServer(slug);
   if (!image) return { title: 'Not found' };
 
   const url = shareUrl(image.slug);
@@ -46,7 +47,8 @@ export async function generateMetadata({
 export default async function ImageViewPage({
   params,
 }: PageProps): Promise<React.ReactElement> {
-  const image = await fetchImageBySlugServer(params.slug);
+  const { slug } = await params;
+  const image = await fetchImageBySlugServer(slug);
   if (!image) notFound();
 
   return (

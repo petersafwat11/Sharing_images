@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { GiftView } from './GiftView';
 
 interface Props {
-  params: { giftId: string };
+  params: Promise<{ giftId: string }>;
 }
 
 export async function generateMetadata({ params: _params }: Props): Promise<Metadata> {
@@ -17,6 +17,7 @@ export async function generateMetadata({ params: _params }: Props): Promise<Meta
   };
 }
 
-export default function GiftPage({ params }: Props): React.ReactElement {
-  return <GiftView giftId={params.giftId} />;
+export default async function GiftPage({ params }: Props): Promise<React.ReactElement> {
+  const { giftId } = await params;
+  return <GiftView giftId={giftId} />;
 }
