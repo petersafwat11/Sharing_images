@@ -15,7 +15,7 @@ function getPhase(elapsed: number): string {
   for (const p of PHASES) {
     if (elapsed < p.maxSeconds) return p.copy;
   }
-  return PHASES[PHASES.length - 1].copy;
+  return PHASES.at(-1)?.copy ?? 'Just a few more seconds\u2026';
 }
 
 interface GeneratingScreenProps {
