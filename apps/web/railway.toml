@@ -1,5 +1,5 @@
 [build]
-buildCommand = "pnpm --filter @picflow/web build"
+buildCommand = "NODE_ENV=production pnpm --filter @picflow/web build"
 
 [deploy]
 startCommand = "node_modules/.bin/next start -p $PORT --dir apps/web"
