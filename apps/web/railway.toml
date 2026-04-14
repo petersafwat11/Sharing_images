@@ -1,5 +1,5 @@
 [build]
-dockerfile = "apps/web/Dockerfile"
+buildCommand = "pnpm --filter @picflow/web build"
 
 [deploy]
-startCommand = "node_modules/.bin/next start -p $PORT"
+startCommand = "node_modules/.bin/next start -p $PORT --dir apps/web"

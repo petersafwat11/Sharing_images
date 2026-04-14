@@ -10,9 +10,6 @@ const nextConfig = {
       { protocol: 'https', hostname: '**' },
     ],
   },
-  experimental: {
-    typedRoutes: true,
-  },
 };
 
 export default nextConfig;
