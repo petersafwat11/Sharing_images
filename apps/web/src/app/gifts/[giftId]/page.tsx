@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { GiftView } from './GiftView';
 
@@ -19,5 +20,9 @@ export async function generateMetadata({ params: _params }: Props): Promise<Meta
 
 export default async function GiftPage({ params }: Props): Promise<React.ReactElement> {
   const { giftId } = await params;
-  return <GiftView giftId={giftId} />;
+  return (
+    <Suspense fallback={null}>
+      <GiftView giftId={giftId} />
+    </Suspense>
+  );
 }

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { GiftNewView } from './GiftNewView';
 
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function GiftNewPage(): React.ReactElement {
-  return <GiftNewView />;
+  return (
+    <Suspense fallback={null}>
+      <GiftNewView />
+    </Suspense>
+  );
 }
