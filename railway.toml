@@ -2,4 +2,4 @@
 buildCommand = "pnpm --filter @picflow/api prisma:generate && pnpm --filter @picflow/api build"
 
 [deploy]
-startCommand = "node_modules/.bin/prisma migrate deploy --schema=apps/api/prisma/schema.prisma && node apps/api/dist/main.js"
+startCommand = "pnpm --filter @picflow/api start:prod"
