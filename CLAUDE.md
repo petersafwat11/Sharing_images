@@ -537,11 +537,13 @@ must be recorded in the "Outstanding TODOs" section below.
   will share jobs from the BullMQ queue. Splitting into a dedicated
   worker bootstrap file is deferred until horizontal scaling actually
   requires it.
-- **Phase 2 — Views flush loop:** `ImagesService.flushViewCounter(slug)`
-  exists and works per-slug, but there is no scheduler yet iterating all
-  tracked slugs every 5 minutes. A BullMQ repeatable job will be added
-  in Phase 5 polish — bump views increment via `INCR` still works today,
-  the counter is just not yet reconciled back to Postgres.
+- **Phase 2 → resolved in Phase 5 — Views flush loop:** every view bump
+  now also `SADD`s the slug into `img:views:tracked`. A BullMQ
+  repeatable job (`workers/view-flush.processor.ts`, queue
+  `view-flush`) ticks every `VIEW_FLUSH_INTERVAL_MS` (5 min), `SPOP`s
+  the set, and reconciles each slug via
+  `ImagesService.flushAllTrackedViews()`. Re-arms idempotently on
+  bootstrap so multi-replica deploys don't double-schedule.
 - **Phase 2 — `update-user.dto.ts`:** CLAUDE.md §5.1 lists this DTO, but
   the only user endpoint so far is `GET /users/me`. The DTO will be
   added in Phase 4 when `PATCH /users/me` is needed for profile edits.
@@ -554,7 +556,20 @@ must be recorded in the "Outstanding TODOs" section below.
   `app/api/auth/[...nextauth]/route.ts` route from §6.1 does not exist
   yet. Dashboard gating is therefore client-side only (a brief
   logged-out flash is possible before the `useEffect` redirect fires).
-- **Phase 4 — BlurImage blurhash decoding:** the `blurHash` string is
-  stored and exposed via the API, but the React component currently
-  shows a solid subtle tint instead of the decoded blur. Full decoding
-  (via `blurhash` → canvas → data URL) is a Phase 5 polish item.
+- **Phase 4 → resolved in Phase 5 — BlurImage blurhash decoding:**
+  `lib/utils/blurhash.ts` now decodes the hash on the client (32×32 →
+  canvas → PNG data URL, cached per hash). `BlurImage` shows the
+  decoded blur as an absolute-positioned background until the real
+  image's `onLoad` fires.
+- **Phase 5 — Error & loading boundaries:** added `app/error.tsx`,
+  `app/global-error.tsx`, and per-route `error.tsx` for `/dashboard`
+  and `/i/[slug]`; route-level `loading.tsx` skeletons for
+  `/dashboard` and `/i/[slug]`. Shared `ErrorView` component keeps
+  copy + styling consistent.
+- **Phase 5 — Recent uploads on home:** §6.1 calls for "recent uploads
+  if authed" on the home page. Added
+  `components/dashboard/RecentUploadsSection` — renders the four
+  newest images for authenticated users and stays silent for
+  anonymous visitors.
+- **Phase 5 — `next-auth` still deferred:** kept localStorage JWT for
+  the v1 utility scope. Tracked here for future revisit.

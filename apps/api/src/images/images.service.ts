@@ -8,6 +8,7 @@ import type { Prisma } from '@prisma/client';
 import {
   IMAGE_CACHE_TTL_SECONDS,
   USER_IMAGES_CACHE_TTL_SECONDS,
+  VIEW_TRACKED_SET_KEY,
   type Image,
   type ImageListResponse,
   type SortKey,
@@ -181,10 +182,42 @@ export class ImagesService {
 
   private async bumpViewCounter(slug: string): Promise<void> {
     try {
-      await this.redis.incr(`img:views:${slug}`);
+      const client = this.redis.raw;
+      // Pipeline so the tracked-set write doesn't double the round-trip.
+      await client
+        .multi()
+        .incr(`img:views:${slug}`)
+        .sadd(VIEW_TRACKED_SET_KEY, slug)
+        .exec();
     } catch (err) {
       this.logger.warn(`View increment failed for ${slug}: ${String(err)}`);
     }
+  }
+
+  /**
+   * Iterates every slug currently tracked in Redis and flushes its
+   * counter to Postgres. Called by the view-flush BullMQ repeatable
+   * job — see workers/view-flush.processor.ts.
+   */
+  async flushAllTrackedViews(): Promise<{ flushed: number }> {
+    const client = this.redis.raw;
+    // SPOP atomically removes + returns up to N members; safe under
+    // concurrent flushers.
+    const slugs = await client.spop(VIEW_TRACKED_SET_KEY, 500);
+    if (!slugs || slugs.length === 0) return { flushed: 0 };
+
+    let flushed = 0;
+    for (const slug of slugs) {
+      try {
+        await this.flushViewCounter(slug);
+        flushed += 1;
+      } catch (err) {
+        this.logger.warn(`Flush failed for ${slug}: ${String(err)}`);
+        // Re-add so the next pass retries it. Better than dropping the count.
+        await client.sadd(VIEW_TRACKED_SET_KEY, slug);
+      }
+    }
+    return { flushed };
   }
 
   private resolveSort(

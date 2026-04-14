@@ -39,4 +39,8 @@ export const THUMBNAIL_WIDTH_PX = 400;
 
 export const QUEUE_NAMES = {
   IMAGE_PROCESSING: 'image-processing',
+  VIEW_FLUSH: 'view-flush',
 } as const;
+
+/** Redis set tracking which slugs have pending view increments. */
+export const VIEW_TRACKED_SET_KEY = 'img:views:tracked';

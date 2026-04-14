@@ -1,4 +1,5 @@
 import { PageContainer } from '@/components/layout/PageContainer';
+import { RecentUploadsSection } from '@/components/dashboard/RecentUploadsSection';
 import { UploadQueue } from '@/components/upload/UploadQueue';
 import { UploadZone } from '@/components/upload/UploadZone';
 
@@ -19,9 +20,12 @@ export default function HomePage(): React.ReactElement {
         </p>
       </section>
 
-      <div className="mt-10 flex flex-col gap-6">
-        <UploadZone />
-        <UploadQueue />
+      <div className="mt-10 flex flex-col gap-10">
+        <div className="flex flex-col gap-6">
+          <UploadZone />
+          <UploadQueue />
+        </div>
+        <RecentUploadsSection />
       </div>
     </PageContainer>
   );
