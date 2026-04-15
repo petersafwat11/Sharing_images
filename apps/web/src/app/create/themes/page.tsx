@@ -4,30 +4,41 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { ThemeGrid } from '@/components/portrait/ThemeGrid';
 import { OutOfCreditsModal } from '@/components/portrait/OutOfCreditsModal';
 import { usePortraitStore } from '@/lib/store/portrait.store';
 import { startPortrait } from '@/lib/api/portraits';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, getAuthToken } from '@/lib/api/client';
 import { getTheme } from '@picflow/shared';
 import toast from 'react-hot-toast';
 
 export default function ThemesPage(): React.ReactElement {
   const router = useRouter();
-  const { inputKeys, email, selectedThemeSlug, selectTheme, reset } = usePortraitStore();
+  const { inputKeys, email, selectedThemeSlug, selectTheme, setEmail, reset } = usePortraitStore();
   const [isGenerating, setIsGenerating] = useState(false);
   const [showOutOfCredits, setShowOutOfCredits] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
 
-  // Guard: if store is empty (direct navigation or refresh), send back
+  useEffect(() => {
+    setIsAuthed(!!getAuthToken());
+  }, []);
+
+  // Guard: if store was never populated (direct navigation / refresh), send back.
+  // Intentionally run on mount only — do NOT add inputKeys to deps, because
+  // reset() clears the store before router.push() resolves and would cause a
+  // spurious redirect back to /create after a successful generation.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (inputKeys.length === 0) {
       router.replace('/create');
     }
-  }, [inputKeys.length, router]);
+  }, []);
 
   const selectedTheme = selectedThemeSlug ? getTheme(selectedThemeSlug) : null;
-  const canGenerate = !!selectedThemeSlug && !isGenerating;
+  const emailOk = isAuthed || email.trim().length > 0;
+  const canGenerate = !!selectedThemeSlug && !isGenerating && emailOk;
 
   const handleGenerate = async (): Promise<void> => {
     if (!selectedThemeSlug) return;
@@ -104,6 +115,35 @@ export default function ThemesPage(): React.ReactElement {
         selectedSlug={selectedThemeSlug}
         onSelect={selectTheme}
       />
+
+      {/* Email gate — only for anonymous users */}
+      {!isAuthed && (
+        <div className="mt-8 space-y-2">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-text-primary"
+          >
+            Email address
+            <span className="ml-1 text-text-tertiary font-normal">
+              — we&apos;ll notify you when portraits are ready
+            </span>
+          </label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="max-w-sm"
+          />
+          <p className="text-caption text-text-tertiary">
+            No account needed. No spam.{' '}
+            <a href="/privacy" className="underline underline-offset-2 hover:text-text-secondary">
+              Privacy policy
+            </a>
+          </p>
+        </div>
+      )}
 
       {/* Sticky bottom CTA on mobile */}
       {selectedThemeSlug && (
