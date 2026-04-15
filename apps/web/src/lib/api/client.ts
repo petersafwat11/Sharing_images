@@ -51,8 +51,16 @@ export class ApiError extends Error {
 }
 
 function buildClient(): AxiosInstance {
+  // In the browser, use a relative baseURL (/api) so requests go to the
+  // Next.js origin and are proxied server-side — no CORS preflight ever.
+  // On the server (SSR), use the full API URL for direct calls.
+  const baseURL =
+    typeof window === 'undefined'
+      ? `${config.apiUrl}${config.apiPrefix}`
+      : config.apiPrefix;
+
   const instance = axios.create({
-    baseURL: `${config.apiUrl}${config.apiPrefix}`,
+    baseURL,
     timeout: 30_000,
     withCredentials: false,
   });
