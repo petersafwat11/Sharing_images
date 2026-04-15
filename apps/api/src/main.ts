@@ -18,6 +18,7 @@ async function bootstrap(): Promise<void> {
   app.enableCors({
     origin: [
       config.get('NEXT_PUBLIC_APP_URL'),
+      'https://picflowweb-production.up.railway.app',
       ...(config.isDevelopment ? ['http://localhost:3000'] : []),
     ],
     credentials: true,
