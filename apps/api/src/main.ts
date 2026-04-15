@@ -14,28 +14,33 @@ async function bootstrap(): Promise<void> {
   const config = app.get(AppConfigService);
   const logger = new Logger('Bootstrap');
 
-  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-
+  // Raw CORS middleware — must run before helmet so preflight OPTIONS
+  // never reaches NestJS guards or the throttler.
   const allowedOrigins = [
     'https://picflowweb-production.up.railway.app',
     config.get('NEXT_PUBLIC_APP_URL'),
     ...(config.isDevelopment ? ['http://localhost:3000'] : []),
   ].filter((o): o is string => typeof o === 'string' && o.length > 0);
 
-  app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS: origin ${origin} not allowed`));
-      }
-    },
-    credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type,Authorization,Accept',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  app.use((req: any, res: any, next: any) => {
+    const origin: string | undefined = req.headers['origin'] as string | undefined;
+    if (origin && allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept,X-Requested-With');
+      res.setHeader('Access-Control-Max-Age', '86400');
+      res.status(204).end();
+      return;
+    }
+    next();
   });
+
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
   app.useGlobalPipes(
     new ValidationPipe({
