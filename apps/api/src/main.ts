@@ -9,25 +9,27 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
     rawBody: true, // Required for Stripe webhook signature verification
+    cors: {
+      origin: '*',
+      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+      // Omit allowedHeaders → cors package reflects Access-Control-Request-Headers
+      // from the preflight, which permits every header the browser asks for.
+      preflightContinue: false,
+      optionsSuccessStatus: 204,
+      maxAge: 86400, // cache preflight for 24 h
+    },
   });
 
   const config = app.get(AppConfigService);
   const logger = new Logger('Bootstrap');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  app.use((req: any, res: any, next: any) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept,X-Requested-With');
-    if (req.method === 'OPTIONS') {
-      res.status(204).end();
-      return;
-    }
-    next();
-  });
-
-  logger.log('CORS: wildcard middleware registered — v2');
-  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+  logger.log('CORS: wildcard enabled via NestFactory — v3');
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginEmbedderPolicy: false, // default require-corp breaks cross-origin
+    }),
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({
