@@ -33,6 +33,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
       );
     }
 
+    // Ensure CORS headers are present on every error response so the
+    // browser doesn't mask the real error with a CORS failure.
+    if (!response.getHeader('Access-Control-Allow-Origin')) {
+      response.setHeader('Access-Control-Allow-Origin', '*');
+      response.setHeader(
+        'Access-Control-Allow-Methods',
+        'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+      );
+      response.setHeader('Access-Control-Allow-Headers', '*');
+    }
+
     response.status(status).json({
       statusCode: status,
       message,
