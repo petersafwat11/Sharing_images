@@ -39,10 +39,13 @@ const TIPS = [
 export function PortraitUploadStep({ onKeysChange }: PortraitUploadStepProps): React.ReactElement {
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
 
-  const updateKeys = (updated: PhotoItem[]): void => {
-    const ready = updated.filter((p) => p.key !== null && !p.error).map((p) => p.key as string);
+  // Derive ready keys as a side-effect of photos changing — never call
+  // onKeysChange inside a setPhotos updater (triggers cross-component setState
+  // during render which React forbids).
+  useEffect(() => {
+    const ready = photos.filter((p) => p.key !== null && !p.error).map((p) => p.key as string);
     onKeysChange(ready);
-  };
+  }, [photos, onKeysChange]);
 
   const uploadPhoto = async (item: PhotoItem): Promise<void> => {
     try {
@@ -57,23 +60,15 @@ export function PortraitUploadStep({ onKeysChange }: PortraitUploadStepProps): R
         transformRequest: [(data: unknown): unknown => data],
       });
 
-      setPhotos((prev) => {
-        const updated = prev.map((p) =>
-          p.id === item.id ? { ...p, key, uploading: false } : p,
-        );
-        updateKeys(updated);
-        return updated;
-      });
+      setPhotos((prev) =>
+        prev.map((p) => (p.id === item.id ? { ...p, key, uploading: false } : p)),
+      );
     } catch {
-      setPhotos((prev) => {
-        const updated = prev.map((p) =>
-          p.id === item.id
-            ? { ...p, uploading: false, error: 'Upload failed — try again' }
-            : p,
-        );
-        updateKeys(updated);
-        return updated;
-      });
+      setPhotos((prev) =>
+        prev.map((p) =>
+          p.id === item.id ? { ...p, uploading: false, error: 'Upload failed — try again' } : p,
+        ),
+      );
     }
   };
 
@@ -103,9 +98,7 @@ export function PortraitUploadStep({ onKeysChange }: PortraitUploadStepProps): R
     setPhotos((prev) => {
       const item = prev.find((p) => p.id === id);
       if (item) URL.revokeObjectURL(item.preview);
-      const updated = prev.filter((p) => p.id !== id);
-      updateKeys(updated);
-      return updated;
+      return prev.filter((p) => p.id !== id);
     });
   };
 
