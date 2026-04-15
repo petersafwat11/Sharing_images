@@ -3,10 +3,11 @@ import {
   HeadObjectCommand,
   PutObjectCommand,
   GetObjectCommand,
+  PutBucketCorsCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PRESIGNED_URL_TTL_SECONDS } from '@picflow/shared';
 import { AppConfigService } from '../config/app-config.service';
 
@@ -21,11 +22,12 @@ export interface PresignedUpload {
  * Nothing outside this service should touch `@aws-sdk/*` directly.
  */
 @Injectable()
-export class StorageService {
+export class StorageService implements OnModuleInit {
   private readonly logger = new Logger(StorageService.name);
   private readonly client: S3Client;
   private readonly bucket: string;
   private readonly publicBaseUrl: string;
+  private readonly appUrl: string;
 
   constructor(private readonly config: AppConfigService) {
     const region = config.get('AWS_REGION');
@@ -38,6 +40,32 @@ export class StorageService {
     });
     this.bucket = config.get('AWS_S3_BUCKET');
     this.publicBaseUrl = `https://${this.bucket}.s3.${region}.amazonaws.com`;
+    this.appUrl = config.get('NEXT_PUBLIC_APP_URL').replace(/\/+$/, '');
+  }
+
+  async onModuleInit(): Promise<void> {
+    try {
+      await this.client.send(
+        new PutBucketCorsCommand({
+          Bucket: this.bucket,
+          CORSConfiguration: {
+            CORSRules: [
+              {
+                AllowedHeaders: ['*'],
+                AllowedMethods: ['PUT', 'GET', 'HEAD'],
+                AllowedOrigins: [this.appUrl, 'http://localhost:3000'],
+                ExposeHeaders: ['ETag'],
+                MaxAgeSeconds: 3600,
+              },
+            ],
+          },
+        }),
+      );
+      this.logger.log(`S3 CORS configured for bucket "${this.bucket}"`);
+    } catch (err) {
+      // Non-fatal: log and continue. Fix IAM permissions (s3:PutBucketCORS) if this recurs.
+      this.logger.warn(`Could not set S3 CORS (bucket may still work if CORS already set): ${String(err)}`);
+    }
   }
 
   async presignPut(
