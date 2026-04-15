@@ -61,7 +61,7 @@ export const REPLICATE_POLL_INTERVAL_MS = 5_000; // 5 seconds
  * Verify at https://replicate.com/tencentarc/photomaker/versions
  */
 export const PHOTOMAKER_MODEL_VERSION =
-  'ddfc2b08d209f9fa8c1eca692712918bd449f695d399ad05d3aefecf538b0007';
+  'ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570fe4';
 
 // ── Credit system ──────────────────────────────────────────────────────────
 
