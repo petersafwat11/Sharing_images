@@ -15,13 +15,26 @@ async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');
 
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+
+  const allowedOrigins = [
+    'https://picflowweb-production.up.railway.app',
+    config.get('NEXT_PUBLIC_APP_URL'),
+    ...(config.isDevelopment ? ['http://localhost:3000'] : []),
+  ].filter((o): o is string => typeof o === 'string' && o.length > 0);
+
   app.enableCors({
-    origin: [
-      config.get('NEXT_PUBLIC_APP_URL'),
-      'https://picflowweb-production.up.railway.app',
-      ...(config.isDevelopment ? ['http://localhost:3000'] : []),
-    ],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: origin ${origin} not allowed`));
+      }
+    },
     credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Authorization,Accept',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   app.useGlobalPipes(
