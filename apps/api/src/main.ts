@@ -1,4 +1,4 @@
-// rebuild trigger v2
+// rebuild trigger v3
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';

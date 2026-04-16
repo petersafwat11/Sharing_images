@@ -1,3 +1,4 @@
+// rebuild trigger v3
 import Link from 'next/link';
 import { Upload, Palette, Sparkles, ArrowRight } from 'lucide-react';
 import { THEMES } from '@picflow/shared';
