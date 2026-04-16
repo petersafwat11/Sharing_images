@@ -88,12 +88,9 @@ export function GalleryView(): React.ReactElement {
       {/* Grid */}
       {isLoading ? (
         <div className="columns-2 gap-3 sm:columns-3 md:columns-4">
-          {Array.from({ length: 12 }).map((_, i) => (
+          {[260, 220, 290, 240, 270, 210, 280, 250, 230, 265, 245, 275].map((h, i) => (
             <div key={i} className="mb-3 break-inside-avoid">
-              <Skeleton
-                className="w-full rounded-xl"
-                style={{ height: `${Math.floor(Math.random() * 100) + 200}px` }}
-              />
+              <Skeleton className="w-full rounded-xl" style={{ height: `${h}px` }} />
             </div>
           ))}
         </div>
