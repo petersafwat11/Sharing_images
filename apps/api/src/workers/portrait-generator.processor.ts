@@ -80,7 +80,7 @@ export class PortraitGeneratorProcessor {
         num_outputs: PORTRAIT_NUM_OUTPUTS,
         guidance_scale: 5,
         num_inference_steps: 50,
-        style_strength_ratio: 20,
+        style_strength_ratio: 35,
         input_image: img1,
       };
       if (img2) replicateInput['input_image2'] = img2;
