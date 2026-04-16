@@ -51,7 +51,7 @@ export const VIEW_TRACKED_SET_KEY = 'img:views:tracked';
 // ── Portrait constants ─────────────────────────────────────────────────────
 export const MIN_PORTRAIT_INPUTS = 1;
 export const MAX_PORTRAIT_INPUTS = 5;
-export const PORTRAIT_NUM_OUTPUTS = 4;
+export const PORTRAIT_NUM_OUTPUTS = 1;
 export const PORTRAIT_EXPIRY_DAYS_ANONYMOUS = 7;
 export const PORTRAIT_GENERATION_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 export const REPLICATE_POLL_INTERVAL_MS = 5_000; // 5 seconds
